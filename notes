@@ -19,3 +19,38 @@ incomeStatementHistory
 balanceSheetHistory
 
 cashflowStatementHistory
+
+Periodes:
+
+"1d" → 1 jour
+
+"5d" → 5 jours
+
+"1mo" → 1 mois
+
+"3mo" → 3 mois
+
+"6mo" → 6 mois
+
+"1y" → 1 an
+
+"2y", "5y", "10y" → plusieurs années
+
+"ytd" → depuis début de l'année
+
+"max" → données max disponibles
+
+ 100 premiers codes (tickers) du S&P 500 :
+
+
+AAPL, MSFT, AMZN, NVDA, GOOGL, META, BRK.B, UNH, JNJ, XOM,
+TSLA, JPM, V, PG, AVGO, HD, MA, MRK, PEP, COST,
+LLY, ABBV, KO, BAC, MCD, WMT, ADBE, CRM, ORCL, TMO,
+CVX, ACN, ABT, INTC, NKE, DHR, LIN, WFC, QCOM, TXN,
+NEE, AMD, MDT, MS, UPS, BMY, PM, RTX, UNP, CAT,
+IBM, AMGN, SCHW, HON, LMT, LOW, SBUX, GS, BLK, GE,
+INTU, AMAT, DE, ADI, ISRG, C, TJX, CB, NOW, CI,
+MO, GILD, PGR, BKNG, ZTS, PLD, ADP, MMC, SYK, MDLZ,
+MDT, EL, SPGI, T, USB, HCA, TGT, FISV, CDNS, KLAC,
+ADI, PANW, CARR, DUK, FIS, REGN, ECL, ITW, TRV, GM,
+CSCO, ATVI, AON, APD, MNST, ETN, PXD, ADI, AIG, MAR
