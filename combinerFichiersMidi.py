@@ -21,6 +21,7 @@ instrument_list = [0, 24, 32, 40, 48, 56, 64, 73, 80, 88]  # piano, guitar, bass
 combined = MidiFile()
 combined.ticks_per_beat = 480  # Valeur standard
 
+
 for i, filename in enumerate(midi_files):
     path = os.path.join(folder, filename)
     midi = MidiFile(path)

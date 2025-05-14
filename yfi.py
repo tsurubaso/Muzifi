@@ -91,6 +91,7 @@ mid.tracks.append(track)
 
 # Ajout du titre (Audacity le lit parfois)
 music_title = f"{company_name} ({start_date} to {end_date})"
+
 track.append(MetaMessage('track_name', name=music_title, time=0))
 
 # Tempo fixe pour mélange (ex: 120 BPM = 500000 microsec)
