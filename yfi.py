@@ -4,6 +4,7 @@ import pandas as pd
 import os
 from datetime import datetime
 from mido import MidiFile, MidiTrack, Message, MetaMessage
+import time
 
 # ─────────────────────────────
 # 🎯 PARAMÈTRES UTILISATEUR
@@ -37,7 +38,7 @@ if df.empty:
 # ─────────────────────────────
 # ✅ NETTOYAGE
 # ─────────────────────────────
-required_cols = ["Open", "High", "Low", "Close"]
+required_cols = ["Open", "High", "Low", "Close", "Volume"]
 df.dropna(inplace=True)
 
 if not all(col in df.columns for col in required_cols):
@@ -66,43 +67,53 @@ if show_chart:
 else:
     print("\n⏩ Graphique ignoré, passage direct à la musique...")
 
+# ─────────────────────────────
+# 🔄 NORMALISATION DES DONNÉES MUSICALES
+# ─────────────────────────────
+closes = df["Close"].values
+min_price, max_price = closes.min(), closes.max()
+min_vol, max_vol = df["Volume"].min(), df["Volume"].max()
+min_range, max_range = (df["High"] - df["Low"]).min(), (df["High"] - df["Low"]).max()
+
+def normalize_price_to_midi(price):
+    return int(40 + (price - min_price) / (max_price - min_price) * (80 - 40))
+
+def normalize_volume_to_duration(volume):
+    return int(240 + (volume - min_vol) / (max_vol - min_vol) * (960 - 240))  # durée en ticks MIDI
+
+def normalize_range_to_velocity(price_range):
+    return int(20 + (price_range - min_range) / (max_range - min_range) * (100 - 20))
 
 # ─────────────────────────────
 # 🎼 CRÉATION DU FICHIER MIDI
 # ─────────────────────────────
 print("\n🎵 Création de la séquence musicale...")
 
-closes = df["Close"].values
-min_price = closes.min()
-max_price = closes.max()
-
-# Normalisation : prix → note MIDI (entre 40 et 80)
-def normalize_price_to_midi(price):
-    return int(40 + (price - min_price) / (max_price - min_price) * (80 - 40))
-
 # Dates pour le titre
 start_date = df.index[0].strftime("%Y-%m-%d")
 end_date = df.index[-1].strftime("%Y-%m-%d")
+music_title = f"{company_name} ({start_date} to {end_date})"
 
 # Création du fichier MIDI
 mid = MidiFile()
 track = MidiTrack()
 mid.tracks.append(track)
 
-# Ajout du titre (Audacity le lit parfois)
-music_title = f"{company_name} ({start_date} to {end_date})"
-
+# Ajout du titre
 track.append(MetaMessage('track_name', name=music_title, time=0))
 
-# Tempo fixe pour mélange (ex: 120 BPM = 500000 microsec)
-TEMPO = 500000  # 120 BPM
+# Tempo fixe (ex: 120 BPM = 500000 microsec)
+TEMPO = 500000  
 track.insert(0, MetaMessage('set_tempo', tempo=TEMPO, time=0))
 
-# Notes MIDI : une par cours de clôture
-for price in closes:
-    note = normalize_price_to_midi(price)
-    track.append(Message('note_on', note=note, velocity=64, time=0))
-    track.append(Message('note_off', note=note, velocity=64, time=480))  # durée = 1 noire
+# Notes MIDI : durée et intensité dynamiques
+for index, row in df.iterrows():
+    note = normalize_price_to_midi(row["Close"])
+    duration = normalize_volume_to_duration(row["Volume"])  
+    velocity = normalize_range_to_velocity(row["High"] - row["Low"])  
+
+    track.append(Message('note_on', note=note, velocity=velocity, time=0))
+    track.append(Message('note_off', note=note, velocity=velocity, time=duration))
 
 # ─────────────────────────────
 # 💾 ENREGISTREMENT SUR LE BUREAU
@@ -112,7 +123,6 @@ desktop_local = os.path.join(os.path.expanduser("~"), "Desktop")
 desktop_path = desktop_onedrive if os.path.exists(desktop_onedrive) else desktop_local
 os.makedirs(desktop_path, exist_ok=True)
 
-# Nom du fichier
 safe_title = f"{company_name}_{start_date}_to_{end_date}.mid".replace(" ", "_").replace(",", "")
 midi_path = os.path.join(desktop_path, safe_title)
 
