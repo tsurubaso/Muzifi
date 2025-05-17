@@ -19,7 +19,7 @@ def get_company_timing_parameters(info):
     current_year = datetime.now().year
     founded = extract_founding_year(info.get("longBusinessSummary", ""), 1985)
     age = current_year - founded
-
+    print("Année de fondation: " + str(founded))
     pitch_shift = max(0, min(30, 30 - age // 3))      # jeunes = sons plus aigus
     tempo = int(700000 - min(500000, age * 5000))     # jeunes = tempo plus rapide
 
