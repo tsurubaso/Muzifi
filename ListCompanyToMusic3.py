@@ -1,97 +1,173 @@
-import os
 import yfinance as yf
-import matplotlib.pyplot as plt
-import mido
-from mido import MidiFile, MidiTrack, Message
 import pandas as pd
-import mplfinance as mpf
-from datetime import datetime, timedelta
+import os
+from datetime import datetime
+from mido import MidiFile, MidiTrack, Message, MetaMessage
+import re
 
-# Configurations
-tickers = ['AAPL', 'MSFT', 'GOOGL']  # Entreprises à traiter
-output_midi_file = os.path.expanduser("~/Desktop/multi_stock_output.mid")
-start_date = (datetime.today() - timedelta(days=30)).strftime('%Y-%m-%d')
-end_date = datetime.today().strftime('%Y-%m-%d')
-bpm = 120
-ticks_per_beat = 480
+# ─────────────────────────────
+# 🎯 PARAMÈTRES BASÉS SUR L'ENTREPRISE
+# ─────────────────────────────
+def extract_founding_year(description, default_year=1985):
+    match = re.search(r"(founded|incorporated) in (\d{4})", description.lower())
+    if match:
+        return int(match.group(2))
+    return default_year
 
-sector_instruments = {
-    "Technology": 81,        # Lead 2 (sawtooth)
-    "Healthcare": 52,        # Choir Aahs
-    "Financial Services": 1, # Acoustic Grand Piano
-    "Consumer Cyclical": 4,  # Electric Piano
-    "Industrials": 19,       # Church Organ
-    "Energy": 29,            # Overdriven Guitar
-    "Utilities": 14,         # Xylophone
-    "Communication Services": 72,  # Clarinet
-    "Basic Materials": 12,   # Marimba
-    "Real Estate": 48        # Strings Ensemble 1
-}
-default_instrument = 0  # Acoustic Grand Piano
 
-def get_stock_data(ticker):
-    data = yf.download(ticker, start=start_date, end=end_date)
-    if data.empty:
-        return None
-    return data
-
-def normalize_series(series, min_val=40, max_val=80):
-    normalized = (series - series.min()) / (series.max() - series.min())
-    return (normalized * (max_val - min_val) + min_val).astype(int)
-
-def get_company_sector(ticker):
-    info = yf.Ticker(ticker).info
-    return info.get("sector", "Unknown")
-
-def get_company_market_cap(ticker):
-    info = yf.Ticker(ticker).info
-    return info.get("marketCap", 1_000_000_000)  # défaut si inconnue
-
-def get_sector_instrument(sector):
-    return sector_instruments.get(sector, default_instrument)
-
-def create_midi_track(ticker, df, channel, instrument, velocity):
-    pitch_series = normalize_series(df["Close"], min_val=60, max_val=80)
-    duration_series = normalize_series(df["High"] - df["Low"], min_val=60, max_val=240)
-
-    track = MidiTrack()
-    track.append(mido.Message('program_change', program=instrument, channel=channel, time=0))
-
-    time_per_note = int(ticks_per_beat * 60 / bpm)
-
-    for pitch, duration in zip(pitch_series, duration_series):
-        track.append(Message('note_on', note=pitch, velocity=velocity, channel=channel, time=0))
-        track.append(Message('note_off', note=pitch, velocity=velocity, channel=channel, time=duration))
+def get_company_timing_parameters(info):
+    current_year = datetime.now().year
+    founded = extract_founding_year(info.get("longBusinessSummary", 1985))
+    # Add a print statement here to see the founded year
+    print(f"Company founded year: {founded}")
     
-    return track
+    age = current_year - founded
 
-def plot_candlestick_chart(df, ticker):
-    mpf.plot(df, type='candle', style='yahoo', title=f"Candlestick Chart for {ticker}",
-             mav=(3, 6, 9), volume=True, savefig=os.path.expanduser(f"~/Desktop/{ticker}_chart.png"))
+    pitch_shift = max(0, min(30, 30 - age // 3))      # jeunes = sons plus aigus
+    tempo = int(700000 - min(500000, age * 5000))     # jeunes = tempo plus rapide
+    start_delay = max(0, (100 - age) * 10)            # vieux = jouent en premier
 
-def generate_midi_for_tickers(tickers):
-    mid = MidiFile(ticks_per_beat=ticks_per_beat)
+    return pitch_shift, tempo, start_delay
 
-    for i, ticker in enumerate(tickers):
-        df = get_stock_data(ticker)
-        if df is None:
-            print(f"Erreur : données introuvables pour {ticker}")
-            continue
+def assign_instrument_by_age(info):
+    current_year = datetime.now().year
+    founded = extract_founding_year(info.get("longBusinessSummary", 1985))
+    # Add a print statement here to see the founded year
+    print(f"Company founded year: {founded}")
+    age = current_year - founded
 
-        if i == 0:
-            plot_candlestick_chart(df, ticker)  # Un seul graphique pour alléger
+    instrument_by_age = [
+        (100, [32, 33, 34]),  # Basses (vieux)
+        (60, [24, 25, 26]),   # Guitares
+        (30, [0, 1, 2]),      # Pianos
+        (15, [40, 41, 42]),   # Violons
+        (0, [72, 73, 74])     # Flûtes (jeunes)
+    ]
 
-        sector = get_company_sector(ticker)
-        instrument = get_sector_instrument(sector)
-        market_cap = get_company_market_cap(ticker)
-        velocity = int(min(127, max(30, market_cap / 10**9)))  # Capitalisation en milliards
+    for limit, instruments in reversed(instrument_by_age):
+        if age >= limit:
+            return instruments[age % len(instruments)]
 
-        print(f"{ticker}: sector={sector}, instrument={instrument}, velocity={velocity}")
+    return 0  # Défaut : piano
 
-        track = create_midi_track(ticker, df, channel=i % 16, instrument=instrument, velocity=velocity)
-        mid.tracks.append(track)
+# ─────────────────────────────
+# 🧾 ENTRÉE UTILISATEUR
+# ─────────────────────────────
 
-    mid.save(output_midi_file)
-    print(f"\n✅ Fichier MIDI enregistré sur le bureau : {output_midi_file}")
+companies = input("📊 Entrez une liste de codes (ex: AAPL, MSFT, NVDA) : ").upper().split(',')
+companies = [c.strip() for c in companies[:20]]
 
-generate_midi_for_tickers(tickers)
+period = input("⏱️ Période (ex: 1mo, 3mo, 6mo, 1y) : ").lower()
+
+output_folder = os.path.join(os.getcwd(), "midis_generated")
+os.makedirs(output_folder, exist_ok=True)
+
+# ─────────────────────────────
+# 🎼 GÉNÉRATION DES FICHIERS MIDI
+# ─────────────────────────────
+
+midi_files = []
+for ticker in companies:
+    print(f"\n📥 Téléchargement des données pour {ticker} sur {period}...")
+    df = yf.download(ticker, period=period)
+
+    if df.empty or not all(col in df.columns for col in ["Open", "High", "Low", "Close", "Volume"]):
+        print(f"❌ Aucune donnée valable pour {ticker}.")
+        continue
+
+    try:
+        info = yf.Ticker(ticker).info
+        # print (info)
+    except Exception:
+        info = {}
+
+    pitch_shift, tempo, start_delay = get_company_timing_parameters(info)
+    instrument = assign_instrument_by_age(info)
+
+    min_price, max_price = df["Close"].min(), df["Close"].max()
+    min_vol, max_vol = df["Volume"].min(), df["Volume"].max()
+    min_range, max_range = (df["High"] - df["Low"]).min(), (df["High"] - df["Low"]).max()
+
+    # ─────────────────────────────
+    # 🎚️ VOLATILITY → INTERVAL
+    # ─────────────────────────────
+    volatility = float((df["High"] - df["Low"]).iloc[0].std())
+
+    if volatility < 2:
+        interval = 4  # major third
+    elif volatility < 5:
+        interval = 5  # perfect fourth
+    else:
+        interval = 7  # perfect fifth
+
+    print(f"📊 Volatility for {ticker}: {volatility:.2f} → Interval: {interval} semitones")
+
+
+    def normalize_price_to_midi(price):
+        return int(40 + (price - min_price).iloc[0] / (max_price - min_price).iloc[0] * (80 - 40))
+
+    def normalize_volume_to_duration(volume):
+        return int((240 + (volume - min_vol) / (max_vol - min_vol) * (960 - 240)).iloc[0])
+
+
+    def normalize_range_to_velocity(price_range):
+        return int(20 + (price_range - min_range).iloc[0] / (max_range - min_range).iloc[0] * (100 - 20))
+
+
+    # Création MIDI
+    mid = MidiFile()
+    track = MidiTrack()
+    mid.tracks.append(track)
+
+    track.append(MetaMessage('track_name', name=ticker, time=0))
+    track.insert(0, MetaMessage('set_tempo', tempo=tempo, time=0))
+    track.insert(0, Message('program_change', program=instrument, time=0))
+
+    current_time = start_delay
+
+    for index, row in df.iterrows():
+        note = normalize_price_to_midi(row["Close"]) + pitch_shift
+        duration = normalize_volume_to_duration(row["Volume"])
+        velocity = normalize_range_to_velocity(row["High"] - row["Low"])
+
+        # Main note
+        track.append(Message('note_on', note=note, velocity=velocity, time=current_time))
+
+        # Harmony note based on volatility
+        harmony_note = min(note + interval, 127)
+        track.append(Message('note_on', note=harmony_note, velocity=velocity - 10, time=0))
+
+        # Note off
+        track.append(Message('note_off', note=note, velocity=velocity, time=duration))
+        track.append(Message('note_off', note=harmony_note, velocity=velocity - 10, time=0))
+
+
+        current_time = 0
+
+    midi_path = os.path.join(output_folder, f"{ticker}.mid")
+    mid.save(midi_path)
+    midi_files.append((midi_path, instrument))
+    print(f"✅ Fichier MIDI créé : {midi_path}")
+
+# ─────────────────────────────
+# 🔗 FUSION DES FICHIERS MIDI
+# ─────────────────────────────
+
+combined = MidiFile()
+combined.ticks_per_beat = 480
+
+for path, instrument in midi_files:
+    midi = MidiFile(path)
+    track = MidiTrack()
+    combined.tracks.append(track)
+
+    track.append(MetaMessage('track_name', name=os.path.basename(path).replace(".mid", ""), time=0))
+    track.insert(0, Message('program_change', program=instrument, time=0))
+
+    for msg in midi.tracks[0]:
+        if not msg.is_meta and msg.type != 'program_change':
+            track.append(msg.copy(time=msg.time))
+
+output_path = os.path.join(output_folder, "fusion_midis_output.mid")
+combined.save(output_path)
+print(f"\n✅ Fichier combiné enregistré : {output_path}")

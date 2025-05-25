@@ -77,7 +77,7 @@ for ticker in companies:
 
     try:
         info = yf.Ticker(ticker).info
-        print (info)
+        # print (info)
     except Exception:
         info = {}
 
@@ -92,7 +92,8 @@ for ticker in companies:
         return int(40 + (price - min_price).iloc[0] / (max_price - min_price).iloc[0] * (80 - 40))
 
     def normalize_volume_to_duration(volume):
-        return int(240 + (volume - min_vol) / (max_vol - min_vol) * (960 - 240))
+        return int((240 + (volume - min_vol) / (max_vol - min_vol) * (960 - 240)).iloc[0])
+
 
     def normalize_range_to_velocity(price_range):
         return int(20 + (price_range - min_range).iloc[0] / (max_range - min_range).iloc[0] * (100 - 20))
