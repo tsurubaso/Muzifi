@@ -40,7 +40,7 @@ Periodes:
 
 "max" → données max disponibles
 
- 100 premiers codes (tickers) du S&P 500 :
+100 premiers codes (tickers) du S&P 500 :
 
 
 AAPL, MSFT, AMZN, NVDA, GOOGL, META, 
@@ -85,3 +85,82 @@ Exemple pour I–vi–IV–V :
 | Classique / romantique  | Do – Fa – Sol – Do        | I – IV – V – I  |
 | Triste/mélancolique     | La mineur – Fa – Do – Sol | vi – IV – I – V |
 | Funk/Neo-Soul           | Ré mineur – Sol – Do – Fa | ii – V – I – IV |
+
+
+
+La gamme est:
+Do – Ré – Mi – Fa – Sol – La – Si
+
+À partir de cette gamme, on peut construire un accord sur chaque degré en empilant des tierces. Voici le résultat :
+
+Degré	Nom de l'accord	Notes	Type d'accord
+I	Do majeur	Do – Mi – Sol	Majeur
+II	Ré mineur	Ré – Fa – La	Mineur
+III	Mi mineur	Mi – Sol – Si	Mineur
+IV	Fa majeur	Fa – La – Do	Majeur
+V	Sol majeur	Sol – Si – Ré	Majeur
+VI	La mineur	La – Do – Mi	Mineur
+VII	Si diminué	Si – Ré – Fa	Diminué
+
+🎵 1. Choisis une gamme (ou tonalité)
+Exemple :
+
+Gamme de Do majeur → Do, Ré, Mi, Fa, Sol, La, Si
+
+Gamme de La mineur → La, Si, Do, Ré, Mi, Fa, Sol
+
+👉 Toutes les notes de ta mélodie devraient en principe faire partie de cette gamme.
+
+🎯 2. Commence (et termine) sur la tonique
+La "tonique" est la première note de la gamme (Do pour Do majeur).
+
+Une mélodie commence et finit souvent sur cette note pour donner un sentiment de stabilité.
+
+🧗 3. Utilise des petits intervalles
+Les mélodies chantables (et agréables) utilisent surtout :
+
+des seconds (ex : Do → Ré),
+
+des tierces (ex : Do → Mi).
+
+Trop de grands sauts (quintes, octaves) → effet dramatique ou maladroit.
+
+♻️ 4. Crée des motifs et répète-les
+Un motif est une mini phrase musicale (2–4 notes).
+
+On peut la répéter avec variations :
+
+même rythme, mais autres notes ;
+
+même notes, autre rythme ;
+
+transposition (on monte ou on descend le motif).
+
+💓 5. Fais respirer ta mélodie
+N’hésite pas à ajouter des silences.
+
+Comme une phrase parlée, une mélodie a besoin de respiration.
+
+🎹 6. Utilise l’accord en dessous comme guide
+Quand un accord est joué :
+
+Tu peux utiliser une note de l’accord comme note de ta mélodie (ça sonne “consonant”).
+
+Tu peux ajouter des notes voisines pour créer du mouvement (ça crée une légère tension, agréable si résolue).
+
+Exemple : si l’accord est Do majeur (Do–Mi–Sol) :
+
+Notes mélodiques sûres : Do, Mi, Sol
+
+Tu peux passer brièvement par Ré ou Fa, à condition de revenir à Do, Mi ou Sol.
+
+🧠 En résumé : mini recette de départ
+Choisis une gamme (Do majeur)
+
+Choisis un motif de 3–4 notes dans cette gamme (ex: Do–Ré–Mi–Sol)
+
+Répète ce motif, avec variations
+
+Respecte les temps forts (souvent le 1er temps) avec une note de l’accord en cours
+
+Termine sur Do
