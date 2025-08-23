@@ -47,5 +47,3 @@ for phrase in melody_phrases:
 output_path = "melodie_simple_do_majeur.mid"
 mid.save(output_path)
 
-
-

@@ -66,8 +66,8 @@ def build_chord(root_note, chord_type="major"):
 # ─────────────────────────────
 # 🎯 PARAMÈTRES UTILISATEUR
 # ─────────────────────────────
-ticker = input("🎹 Code de l'entreprise (ex: AAPL, MSFT, TSLA) : ").upper()
-period = input("⏱️ Période (ex: 1mo, 3mo, 6mo, 1y) : ").lower()
+ticker = input("🎹 Code de l'entreprise (ex: AAPL, MSFT, TSLA) : ").upper() 
+period = input("⏱️ Période (ex:  1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max) : ").lower()
 show_chart = input("Afficher le graphique ? (o/n) : ").strip().lower() == "o"
 
 # ─────────────────────────────
