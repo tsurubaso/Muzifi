@@ -45,8 +45,8 @@ chord_track.append(Message('program_change', program=0, time=0))  # Piano
 melody_track.append(Message('program_change', program=40, time=0))  # Violin
 
 # Durées
-chord_duration = 960  # noire
-note_duration = 240   # croche
+chord_duration = 480  # noire
+note_duration = 480  # croche
 
 # Construction des pistes
 for i, (chord_name, chord_notes) in enumerate(chords):
