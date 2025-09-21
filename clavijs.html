@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Keyboard Piano + Metronome</title>
+<style>
+  body { background: #111; color: #fff; font-family: sans-serif; }
+  #notes { font-size: 24px; margin-top: 20px; }
+  #metronome { width: 40px; height: 40px; border-radius: 50%; margin-top: 20px; }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.39/Tone.min.js"></script>
+</head>
+<body>
+<h1>QWERTY Piano (Do Ré Mi)</h1>
+<p>White keys: A S D F G H J | Black keys: W E T Y U | Octave Up: O | Octave Down: P</p>
+<div id="notes">Notes pressed: </div>
+<div id="octave">Octave: 4</div>
+<div id="metronome"></div>
+
+<script>
+const synth = new Tone.Synth().toDestination();
+let currentOctave = 4;
+
+// QWERTY key -> Do Ré Mi note
+const keyMap = {
+  a: 'C', s: 'D', d: 'E', f: 'F', g: 'G', h: 'A', j: 'B',
+  w: 'C#', e: 'D#', t: 'F#', y: 'G#', u: 'A#'
+};
+
+let pressedKeys = new Set();
+
+// Visual metronome
+const bpm = 120;
+const msPerBeat = 60000 / bpm;
+const metronomeDiv = document.getElementById('metronome');
+
+function flashMetronome() {
+  metronomeDiv.style.background = '#0f0';
+  setTimeout(() => metronomeDiv.style.background = '#555', 100);
+}
+setInterval(flashMetronome, msPerBeat);
+
+// Update pressed notes display
+function updateDisplay() {
+  document.getElementById('notes').innerText = "Notes pressed: " + [...pressedKeys].join(' ');
+  document.getElementById('octave').innerText = "Octave: " + currentOctave;
+}
+
+document.addEventListener('keydown', (e) => {
+  const key = e.key.toLowerCase();
+  if (keyMap[key] && !pressedKeys.has(key)) {
+    const note = keyMap[key] + currentOctave;
+    synth.triggerAttack(note);
+    pressedKeys.add(key);
+    updateDisplay();
+  } else if (key === 'o') {
+    currentOctave++;
+    updateDisplay();
+  } else if (key === 'p') {
+    currentOctave--;
+    updateDisplay();
+  }
+});
+
+document.addEventListener('keyup', (e) => {
+  const key = e.key.toLowerCase();
+  if (keyMap[key] && pressedKeys.has(key)) {
+    const note = keyMap[key] + currentOctave;
+    synth.triggerRelease(note);
+    pressedKeys.delete(key);
+    updateDisplay();
+  }
+});
+</script>
+</body>
+</html>
