@@ -1,5 +1,5 @@
 import pygame
-import mido
+
 from mido import MidiFile, MidiTrack, Message
 import time
 
